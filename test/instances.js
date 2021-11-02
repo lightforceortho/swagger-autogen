@@ -54,6 +54,10 @@ const doc = {
         {
             "name": "User",
             "description": "Endpoints"
+        },
+        {
+            "name": "_.01.js",
+            "description": "Main Api"
         }
     ],
     securityDefinitions: {

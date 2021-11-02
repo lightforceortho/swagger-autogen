@@ -3,14 +3,13 @@ var tape = require('tape')
 var _test = require('tape-promise').default
 var test = _test(tape)
 
-const swaggerAutogen = require('../swagger-autogen')()
 const inst = require('./instances')
-
 const expectedPaths = inst.expectedPaths
 var expectedDoc = inst.cloneObj(inst.doc)
 expectedDoc.definitions = inst.expectedDefinitions
 
 test('endpoints/easy.js:', async (t) => {
+  const swaggerAutogen = require('../swagger-autogen')()
   await swaggerAutogen('./swagger_output.json', ['./test/endpoints/easy.js'], inst.cloneObj(inst.doc)).then(() => {
     fs.readFile('./swagger_output.json', 'utf8', function (err, data) {
       let output = JSON.parse(data)
@@ -65,6 +64,7 @@ test('endpoints/easy.js:', async (t) => {
 
 /* Teste de quebra de linha, espaços a mais e uso de ';' */
 test('endpoints/_01.js:', async (t) => {
+  const swaggerAutogen = require('../swagger-autogen')()
   await swaggerAutogen('./test/swagger_output_01.json', ['./test/endpoints/_01.js'], inst.cloneObj(inst.doc)).then(() => {
     fs.readFile('./test/swagger_output_01.json', 'utf8', function (err, data) {
       let output = JSON.parse(data)
@@ -87,6 +87,7 @@ test('endpoints/_01.js:', async (t) => {
 
 /* Teste invertendo declaração dos parâmetros */
 test('endpoints/_02.js:', async (t) => {
+  const swaggerAutogen = require('../swagger-autogen')()
   await swaggerAutogen('./test/swagger_output_02.json', ['./test/endpoints/_02.js'], inst.cloneObj(inst.doc)).then(() => {
     fs.readFile('./test/swagger_output_02.json', 'utf8', function (err, data) {
       let output = JSON.parse(data)
@@ -106,3 +107,20 @@ test('endpoints/_02.js:', async (t) => {
   })
 })
 
+/* Teste invertendo declaração dos parâmetros */
+test('endpoints/_02.js:', async (t) => {
+  const swaggerAutogen = require('../swagger-autogen')({ filenametags: true })
+  const filename = '_02';
+  await swaggerAutogen('./test/swagger_output_02.json', [`./test/endpoints/${filename}.js`], inst.cloneObj(inst.doc)).then(() => {
+    fs.readFile('./test/swagger_output_02.json', 'utf8', function (err, data) {
+      let output = JSON.parse(data)
+
+      /* PATHS */
+      t.true(true, " "); t.true(true, "\nPaths (endpoints/_02.js):")
+      const expectedPathsWithFilenameTag = inst.cloneObj(expectedPaths);
+      expectedPathsWithFilenameTag["/automatic/user/{id}"].get.tags = [ filename ];
+      t.deepEqual(output.paths["/automatic/user/{id}"], expectedPathsWithFilenameTag["/automatic/user/{id}"], '["/automatic/user/{id}"]: OK')
+      t.end()
+    })
+  })
+})

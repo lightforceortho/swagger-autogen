@@ -1,6 +1,7 @@
 const fs = require('fs');
 const JSON5 = require('json5');
 const merge = require('deepmerge');
+const pathUtil = require('path');
 const swaggerTags = require('./swagger-tags');
 const handleData = require('./handle-data');
 const statics = require('./statics');
@@ -17,8 +18,9 @@ const overwriteMerge = (destinationArray, sourceArray, options) => {
  * @param {string} pathRoute Route's path to which file endpoints belong.
  * @param {string} relativePath Relative file's path.
  * @param {array} receivedRouteMiddlewares Array containing middleware to be applied in the endpoint's file.
+ * @param {object} options swagger options as passed in
  */
-function readEndpointFile(filePath, pathRoute = '', relativePath, receivedRouteMiddlewares = [], restrictedContent) {
+function readEndpointFile(filePath, pathRoute = '', relativePath, receivedRouteMiddlewares = [], restrictedContent, options) {
     return new Promise(resolve => {
         let paths = {};
         fs.readFile(filePath, 'utf8', async function (err, data) {
@@ -1033,6 +1035,9 @@ function readEndpointFile(filePath, pathRoute = '', relativePath, receivedRouteM
                             }
                             if (endpoint && endpoint.includes(statics.SWAGGER_TAG + '.tags')) {
                                 objEndpoint[path][method]['tags'] = swaggerTags.getTags(endpoint);
+                            }
+                            if (options.filenametags) {
+                                objEndpoint[path][method]['tags'] =  [ pathUtil.parse(filePath).name ];
                             }
                             if (endpoint && endpoint.includes(statics.SWAGGER_TAG + '.security')) {
                                 objEndpoint[path][method]['security'] = await swaggerTags.getSecurityTag(endpoint);
